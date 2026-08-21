@@ -1,69 +1,188 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import Papa from "papaparse";
+import { Location } from "./types/location";
+
+const Map = dynamic(() => import("./components/Map"), {
+  ssr: false,
+});
+
 
 export default function Home() {
+  const [address, setAddress] = useState("");
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
+const [importProgress, setImportProgress] = useState(0);
+const [importTotal, setImportTotal] = useState(0);
+
+  async function geocodeAddress(address: string) {
+  const response = await fetch("/api/geocode", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      address,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "No se pudo encontrar la dirección");
+  }
+
+  return data;
+}
+
+  async function addAddress() {
+  if (!address.trim()) return;
+
+  try {
+    const data = await geocodeAddress(address);
+
+    setLocations([
+      ...locations,
+      {
+        id: crypto.randomUUID(),
+        customer: `Cliente ${locations.length + 1}`,
+        address,
+        latitude: data.latitude,
+        longitude: data.longitude,
+      },
+    ]);
+
+    setAddress("");
+  } catch (error) {
+    alert(
+      error instanceof Error
+        ? error.message
+        : "Ocurrió un error"
+    );
+  }
+}
+
+async function handleFileUpload(
+  event: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = event.target.files?.[0];
+
+  if (!file) return;
+
+  setIsImporting(true);
+  setImportProgress(0);
+
+  Papa.parse<{ cliente: string; direccion: string }>(file, {
+    header: true,
+    skipEmptyLines: true,
+
+    complete: async (results) => {
+      setImportTotal(results.data.length);
+
+      let processed = 0;
+
+      for (const row of results.data) {
+        try {
+          console.log("Procesando:", row.cliente);
+
+          const data = await geocodeAddress(row.direccion);
+
+          const newLocation: Location = {
+            id: crypto.randomUUID(),
+            customer: row.cliente,
+            address: row.direccion,
+            latitude: data.latitude,
+            longitude: data.longitude,
+          };
+
+          setLocations((currentLocations) => [
+            ...currentLocations,
+            newLocation,
+          ]);
+
+          console.log("Procesado:", newLocation);
+        } catch (error) {
+          console.error(
+            `No se pudo geocodificar ${row.direccion}`,
+            error
+          );
+        }
+
+        processed++;
+        setImportProgress(processed);
+      }
+
+      setIsImporting(false);
+    },
+  });
+}
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main>
+      <h1>Route Planner</h1>
+      <p>Planificá tus rutas de manera inteligente.</p>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Ingresá una dirección"
+          value={address}
+          onChange={(event) => setAddress(event.target.value)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        <button
+  onClick={addAddress}
+  disabled={isImporting}
+>
+  Agregar
+</button>
+        <input
+  type="file"
+  accept=".csv"
+  disabled={isImporting}
+  onChange={handleFileUpload}
+/>
+{isImporting && (
+  <div>
+    <p>
+      Importando {importProgress} / {importTotal}
+    </p>
+
+    <progress
+      value={importProgress}
+      max={importTotal}
+    />
+  </div>
+)}
+      </div>
+
+      <div>
+        <h2>Direcciones</h2>
+
+        <ul>
+          {locations.map((location) => (
+  <li key={location.id}>
+    <span>
+      {location.customer} — {location.address}
+    </span>
+
+    <button
+      onClick={() =>
+        setLocations(
+          locations.filter((item) => item.id !== location.id)
+        )
+      }
+    >
+      Eliminar
+    </button>
+  </li>
+))}
+        </ul>
+      </div>
+
+      <Map locations={locations} />
+    </main>
   );
 }

@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Route Planner
+
+Web application for managing customer locations and planning delivery or sales routes.
+
+The project allows users to add addresses manually or import multiple customers from a CSV file, geocode their locations, and visualize them on an interactive map.
+
+## Features
+
+- Add addresses manually
+- Geocode addresses using Nominatim
+- Display locations on an interactive map
+- Automatically adjust the map to the available locations
+- Remove locations
+- Import multiple customers from CSV
+- Show customer information in map markers
+
+## Tech Stack
+
+- **Next.js**
+- **React**
+- **TypeScript**
+- **React Leaflet**
+- **OpenStreetMap**
+- **Nominatim**
+- **Papa Parse**
+- **Tailwind CSS**
 
 ## Getting Started
 
-First, run the development server:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/route-planner.git
+cd route-planner
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## CSV Format
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The CSV file should contain the following columns:
 
-## Learn More
+```csv
+cliente,direccion
+Juan Perez,"San Martin 1250, Concordia, Entre Rios"
+Carlos Gomez,"Urquiza 800, Concordia, Entre Rios"
+Pedro Lopez,"Entre Rios 500, Concordia, Entre Rios"
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Project Status
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+🚧 **Work in progress**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The current version focuses on address management, geocoding, CSV import, and map visualization.
 
-## Deploy on Vercel
+### Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- [ ] Route generation
+- [ ] Distance calculation
+- [ ] Estimated travel time
+- [ ] Route optimization
+- [ ] Persistent storage
+- [ ] Improved CSV validation
+- [ ] Production deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Purpose
+
+This project is being developed as a practical route planning tool for salespeople and delivery drivers who need to organize multiple customer visits efficiently.
+
+---
+
+Built with Next.js, React and TypeScript.

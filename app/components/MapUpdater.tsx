@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import { useMap } from "react-leaflet";
-import { Location } from "../types/location";
+import { Customer } from "../types/customer";
 
 interface MapUpdaterProps {
-  locations: Location[];
+  locations: Customer[];
 }
 
 export default function MapUpdater({ locations }: MapUpdaterProps) {
@@ -17,14 +17,14 @@ export default function MapUpdater({ locations }: MapUpdaterProps) {
     if (locations.length === 1) {
       map.setView(
         [locations[0].latitude, locations[0].longitude],
-        15
+        15,
       );
       return;
     }
 
     const bounds = locations.map(
       (location) =>
-        [location.latitude, location.longitude] as [number, number]
+        [location.latitude, location.longitude] as [number, number],
     );
 
     map.fitBounds(bounds, {

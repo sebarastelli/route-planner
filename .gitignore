@@ -42,3 +42,4 @@ next-env.d.ts
 
 # local test files
 clientes.csv
+/app/generated/prisma

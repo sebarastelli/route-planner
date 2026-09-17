@@ -7,6 +7,7 @@ import CustomerForm from "./components/CustomerForm";
 import CustomerList from "./components/CustomerList";
 import CsvImporter from "./components/CsvImporter";
 import { geocodeAddress } from "./lib/geocoding";
+import LogoutButton from "./components/LogoutButton";
 
 const Map = dynamic(() => import("./components/Map"), {
   ssr: false,
@@ -160,6 +161,8 @@ export default function Home() {
         locations={customers}
         selectedLocations={selectedCustomers}
       />
+
+      <LogoutButton />
     </main>
   );
 }

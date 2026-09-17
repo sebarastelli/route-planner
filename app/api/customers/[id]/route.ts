@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/app/lib/prisma";
 
 export async function DELETE(
@@ -6,15 +7,40 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.organizationId) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 },
+      );
+    }
+
     const { id } = await params;
 
-    await prisma.customer.delete({
+    const customer = await prisma.customer.findFirst({
       where: {
         id,
+        organizationId: session.user.organizationId,
       },
     });
 
-    return NextResponse.json({ message: "Cliente eliminado" });
+    if (!customer) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 404 },
+      );
+    }
+
+    await prisma.customer.delete({
+      where: {
+        id: customer.id,
+      },
+    });
+
+    return NextResponse.json({
+      message: "Cliente eliminado",
+    });
   } catch (error) {
     console.error("Error eliminando cliente:", error);
 
@@ -30,12 +56,35 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.organizationId) {
+      return NextResponse.json(
+        { error: "No autorizado" },
+        { status: 401 },
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
 
-    const customer = await prisma.customer.update({
+    const customer = await prisma.customer.findFirst({
       where: {
         id,
+        organizationId: session.user.organizationId,
+      },
+    });
+
+    if (!customer) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 404 },
+      );
+    }
+
+    const updatedCustomer = await prisma.customer.update({
+      where: {
+        id: customer.id,
       },
       data: {
         name: body.name,
@@ -48,7 +97,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(customer);
+    return NextResponse.json(updatedCustomer);
   } catch (error) {
     console.error("Error actualizando cliente:", error);
 
